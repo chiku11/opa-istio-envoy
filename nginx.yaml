@@ -1,0 +1,50 @@
+---
+apiVersion: v1
+kind: Service 
+metadata:
+  name: nginx
+  namespace: opa-playground
+spec:
+  selector:
+    app: nginx
+  ports:
+  - name: http
+    port: 8080
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: nginx
+  namespace: opa-playground
+spec:
+  hosts:
+  - '*'
+  gateways:
+  - example/httpbin-gateway
+  http:
+  - route:
+    - destination: 
+        port:
+          number: 8080
+        host: nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: opa-playground
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+
+  template:
+    metadata: 
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx-opa:1.0 
+        ports:
+        - containerPort: 8080
